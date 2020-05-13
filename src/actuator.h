@@ -54,7 +54,7 @@ typedef struct cc_actuator_t {
     float min, max, last_value;
     uint32_t supported_modes;
     int max_assignments;
-    cc_assignment_t *assignment;
+    cc_assignment_t *assignments;
 } cc_actuator_t;
 
 
@@ -72,6 +72,10 @@ void cc_actuator_map(cc_assignment_t *assignment);
 void cc_actuator_unmap(cc_assignment_t *assignment);
 // process the assignments of all created actuators
 void cc_actuators_process(void (*events_cb)(void *arg));
+
+cc_assignment_t *cc_get_current_assignment(cc_actuator_t *actuator);
+
+void cc_actuator_next_assignment(cc_actuator_t *actuator);
 
 
 /*

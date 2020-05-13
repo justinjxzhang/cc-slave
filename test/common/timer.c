@@ -20,18 +20,18 @@ void timer_handler(int signo)
     g_timer_cb();
 }
 
-void timer_init(void (*callback)(void))
+void cc_timer_init(void (*callback)(void))
 {
-    printf("timer_init (callback = %p)\n", callback);
+    printf("cc_timer_init (callback = %p)\n", callback);
 
     // set callbacks
     signal(SIGALRM, timer_handler);
     g_timer_cb = callback;
 }
 
-void timer_set(uint32_t time_us)
+void cc_timer_set(uint32_t time_us)
 {
-    printf("timer_set (time_us = %i)\n", time_us);
+    printf("cc_timer_set (time_us = %i)\n", time_us);
 
     // zero interval means no reset of timer
     timerclear(&tval.it_interval);
@@ -43,7 +43,7 @@ void timer_set(uint32_t time_us)
     setitimer(ITIMER_REAL, &tval, NULL);
 }
 
-void delay_us(uint32_t time_us)
+void cc_delay_us(uint32_t time_us)
 {
     for (volatile uint32_t i = 0; i < time_us; i++);
 }

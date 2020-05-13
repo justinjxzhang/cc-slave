@@ -42,10 +42,11 @@ extern "C"
 ****************************************************************************************************
 */
 
-void timer_init(void (*callback)(void));
-void timer_set(uint32_t time_ms);
+void cc_timer_init(void (*callback)(void));
 
-void delay_us(uint32_t time_us);
+void cc_timer_set(uint32_t time_ms);
+
+void cc_delay_us(uint32_t time_us);
 
 
 /*

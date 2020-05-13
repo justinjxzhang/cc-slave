@@ -3,8 +3,8 @@
 *       INCLUDE FILES
 ****************************************************************************************************
 */
-
 #include <stdint.h>
+#include <stdio.h>
 #include "control_chain.h"
 #include "utils.h"
 #include "msg.h"
@@ -163,7 +163,7 @@ static void parser(cc_handle_t *handle)
                 // delay the message before send it (the delay value is based on the random id)
                 // this delay should minimize the chance of handshake conflicting
                 // since multiple devices can be connected at the same time
-                delay_us(wait_us);
+                cc_delay_us(wait_us);
 
                 // send message
                 handle->device_id = BROADCAST_ADDRESS;
@@ -247,7 +247,7 @@ static void parser(cc_handle_t *handle)
         {
             // device id is used to define the communication frame
             // timer is reseted each regular sync message
-            timer_set(handle->device_id * CC_FRAME_PERIOD);
+            cc_timer_set(handle->device_id * CC_FRAME_PERIOD);
         }
         else if (msg_rx->command == CC_CMD_DEV_CONTROL)
         {
@@ -270,6 +270,7 @@ static void parser(cc_handle_t *handle)
             cc_msg_parser(msg_rx, assignment);
 
             cc_actuator_map(assignment);
+
             raise_event(handle, CC_EV_ASSIGNMENT, assignment);
 
             cc_msg_builder(CC_CMD_ASSIGNMENT, 0, handle->msg_tx);
@@ -341,7 +342,7 @@ void cc_init(void (*response_cb)(void *arg), void (*events_cb)(void *arg))
     g_cc_handle.msg_rx = cc_msg_new(rx_buffer);
     g_cc_handle.msg_tx = cc_msg_new(tx_buffer);
 
-    timer_init(timer_callback);
+    cc_timer_init(timer_callback);
 }
 
 void cc_process(void)
@@ -402,6 +403,11 @@ int cc_parse(const cc_data_t *received)
             case 2:
                 msg->command = byte;
                 handle->msg_state++;
+                if (byte != 0x00) {
+                    printf("COMMAND: ");
+                    printf("%02X", byte);
+                    printf("\n");
+                }
                 break;
 
             // data size LSB

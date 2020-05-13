@@ -40,7 +40,10 @@
 */
 
 static cc_actuator_t g_actuators[MAX_ACTUATORS];
+static cc_assignment_t g_assignments[MAX_ACTUATORS][CC_MAX_ASSIGNMENTS];
 static unsigned int g_actuators_count;
+static unsigned int g_assignments_count[MAX_ACTUATORS];
+static unsigned int g_current_assignment[MAX_ACTUATORS];
 
 
 /*
@@ -206,6 +209,9 @@ cc_actuator_t *cc_actuator_new(cc_actuator_config_t *config)
     actuator->max_assignments = config->max_assignments;
     str16_create(config->name, &actuator->name);
 
+    actuator->assignments = &g_assignments[g_assignments_count[g_actuators_count]];
+
+    g_assignments_count[g_actuators_count]++;
     g_actuators_count++;
 
     return actuator;
@@ -219,7 +225,9 @@ void cc_actuator_map(cc_assignment_t *assignment)
         cc_actuator_t *actuator = &g_actuators[i];
         if (actuator->id == assignment->actuator_id)
         {
-            actuator->assignment = assignment;
+            actuator->assignments[assignment->id] = *assignment;
+            g_assignments_count[assignment->actuator_id]++;
+            g_current_assignment[i] = assignment->id;
             break;
         }
     }
@@ -247,7 +255,10 @@ void cc_actuator_unmap(cc_assignment_t *assignment)
         cc_actuator_t *actuator = &g_actuators[i];
         if (actuator->id == assignment->actuator_id)
         {
-            actuator->assignment = 0;
+            // actuator->assignment = 0;
+            for (int i = 0; i < CC_MAX_ASSIGNMENTS; i++)  {
+                // actuator->assignments[i] = 0;
+            }
             break;
         }
     }
@@ -258,16 +269,14 @@ void cc_actuators_process(void (*events_cb)(void *arg))
     for (uint8_t i = 0; i < g_actuators_count; i++)
     {
         cc_actuator_t *actuator = &g_actuators[i];
-        cc_assignment_t *assignment = actuator->assignment;
+        cc_assignment_t *assignment = cc_get_current_assignment(actuator);
 
         if (!assignment)
             continue;
-
-        // update assignment value according current actuator value
+            // update assignment value according current actuator value
         int updated = update_assignment_value(actuator, assignment);
         if (updated)
         {
-            // append update to be sent
             cc_update_t update;
             update.assignment_id = assignment->id;
             update.value = assignment->value;
@@ -282,4 +291,12 @@ void cc_actuators_process(void (*events_cb)(void *arg))
             }
         }
     }
+}
+
+cc_assignment_t *cc_get_current_assignment(cc_actuator_t *actuator) {
+    return &actuator->assignments[g_current_assignment[actuator->id]];
+}
+
+void cc_actuator_next_assignment(cc_actuator_t *actuator) {
+    g_current_assignment[actuator->id] = (g_current_assignment[actuator->id] + 1) % (g_assignments_count[actuator->id] - 1);
 }

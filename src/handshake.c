@@ -65,7 +65,7 @@ static cc_handshake_t g_handshake;
 ****************************************************************************************************
 */
 
-cc_handshake_t *cc_handshake_generate(uint16_t *delay_us)
+cc_handshake_t *cc_handshake_generate(uint16_t *cc_delay_us)
 {
     cc_handshake_t *handshake = &g_handshake;
 
@@ -84,7 +84,7 @@ cc_handshake_t *cc_handshake_generate(uint16_t *delay_us)
     handshake->firmware.micro = CC_FIRMWARE_MICRO;
 
     // calculate the delay based on the random id
-    *delay_us = ((random_id % HANDSHAKES_PERIOD) / HANDSHAKE_SIZE) * HANDSHAKE_SIZE;
+    *cc_delay_us = ((random_id % HANDSHAKES_PERIOD) / HANDSHAKE_SIZE) * HANDSHAKE_SIZE;
 
     return handshake;
 }
